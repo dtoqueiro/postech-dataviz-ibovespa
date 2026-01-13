@@ -514,10 +514,14 @@ if len(df_bt) <= WINDOW_SIZE:
 
 # Executar backtest
 with st.spinner("🔄 Processando backtest..."):
-    df_backtest = df_backtest_full[
+    df_backtest = df_backtest_full.loc[
         (df_backtest_full["Data"].dt.date >= data_ini)
         & (df_backtest_full["Data"].dt.date <= data_fim)
-    ]
+    ].copy()
+    # df_backtest = df_backtest_full[
+    #     (df_backtest_full["Data"].dt.date >= data_ini)
+    #     & (df_backtest_full["Data"].dt.date <= data_fim)
+    # ]
     df_backtest["Acerto_Int"] = df_backtest["Acerto"].astype(int)
     df_backtest["Acuracia"] = df_backtest["Acerto_Int"].expanding().mean()
 
