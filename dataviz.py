@@ -268,7 +268,7 @@ scaler = carregar_scaler()
 # ==========================================================
 # DADOS
 # ==========================================================
-@st.cache_data
+@st.cache_data(ttl=3600)
 def carregar_dados(periodo="4y"):
     try:
         ibov = yf.download("^BVSP", period=periodo, interval="1d", progress=False)
