@@ -269,7 +269,7 @@ scaler = carregar_scaler()
 # ==========================================================
 # DADOS
 # ==========================================================
-@st.cache_data(ttl=3600)
+@st.cache_data()
 def carregar_dados(periodo="4y"):
     try:
         ibov = yf.download("^BVSP", period=periodo, interval="1d", progress=False)
@@ -338,7 +338,7 @@ def preparar_input(janela):
 # ==========================================================
 # BACKTEST COM CACHE
 # ==========================================================
-@st.cache_data
+# @st.cache_data
 def executar_backtest(_df_feat):
     resultados = []
 
