@@ -3,13 +3,13 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-import yfinance as yf
 import joblib
 import plotly.graph_objects as go
 import plotly.express as px
-import requests
-from yfinance import utils
-from pandas_datareader import data as pdr
+import appdirs as ad
+
+ad.user_cache_dir = lambda *args: "/tmp"
+import yfinance as yf
 
 # ==========================================================
 # CONFIGURAÇÃO DA PÁGINA E ESTILO
@@ -271,26 +271,12 @@ scaler = carregar_scaler()
 @st.cache_data
 def carregar_dados(periodo="4y"):
     try:
-        end = pd.Timestamp.today()
-        start = end - pd.DateOffset(years=4)
-        ibov = pdr.get_data_stooq("^BVSP", start=start, end=end)
-        dolar = pdr.get_data_stooq("USD/BRL", start=start, end=end)
+        ibov = yf.download("^BVSP", period=periodo, interval="1d", progress=False)
+        dolar = yf.download("USDBRL=X", period=periodo, interval="1d", progress=False)
 
-        ibov.sort_index(inplace=True)
-        dolar.sort_index(inplace=True)
+        df = pd.concat([ibov[["Open", "High", "Low", "Close"]], dolar["Close"]], axis=1)
 
-        # 🔧 PADRONIZAÇÃO DE COLUNAS
-        ibov.rename(
-            columns={"open": "Open", "high": "High", "low": "Low", "close": "Close"},
-            inplace=True,
-        )
-
-        dolar.rename(columns={"close": "Close_Dolar"}, inplace=True)
-
-        df = pd.concat(
-            [ibov[["Open", "High", "Low", "Close"]], dolar["Close_Dolar"]], axis=1
-        )
-
+        df.columns = ["Open", "High", "Low", "Close", "Close_Dolar"]
         df.dropna(inplace=True)
         return df
     except Exception as e:
