@@ -6,6 +6,7 @@ import numpy as np
 import joblib
 import plotly.graph_objects as go
 import plotly.express as px
+import pandas_datareader.data as web
 # import appdirs as ad
 
 # ad.user_cache_dir = lambda *args: "/tmp"
@@ -278,10 +279,26 @@ def carregar_dados(periodo="4y"):
 
         df.columns = ["Open", "High", "Low", "Close", "Close_Dolar"]
         df.dropna(inplace=True)
+
+        df.to_csv("data.csv")
+
         return df
     except Exception as e:
-        st.error(f"❌ Erro ao carregar dados: {str(e)}")
-        st.stop()
+        try:
+            st.warning(
+                f"⚠️ Falha na conexão ou download ({str(e)}). Tentando carregar dados locais..."
+            )
+
+            # Lê o CSV definindo a primeira coluna como índice (datas)
+            df = pd.read_csv("data.csv", index_col=0, parse_dates=True)
+
+            st.success("✅ Dados carregados do arquivo local (data.csv).")
+            return df
+        except FileNotFoundError:
+            st.error(
+                "❌ Erro crítico: Não foi possível baixar os dados e o arquivo 'data.csv' não foi encontrado."
+            )
+            st.stop()
 
 
 # ==========================================================
