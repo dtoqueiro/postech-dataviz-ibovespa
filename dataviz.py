@@ -6,9 +6,9 @@ import numpy as np
 import joblib
 import plotly.graph_objects as go
 import plotly.express as px
-import appdirs as ad
+# import appdirs as ad
 
-ad.user_cache_dir = lambda *args: "/tmp"
+# ad.user_cache_dir = lambda *args: "/tmp"
 import yfinance as yf
 
 # ==========================================================
