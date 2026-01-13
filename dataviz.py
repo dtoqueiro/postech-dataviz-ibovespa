@@ -275,6 +275,9 @@ def carregar_dados(periodo="4y"):
         ibov = yf.download("^BVSP", period=periodo, interval="1d", progress=False)
         dolar = yf.download("USDBRL=X", period=periodo, interval="1d", progress=False)
 
+        if ibov.empty or dolar.empty:
+            raise ValueError("O Yahoo Finance retornou dados vazios.")
+
         df = pd.concat([ibov[["Open", "High", "Low", "Close"]], dolar["Close"]], axis=1)
 
         df.columns = ["Open", "High", "Low", "Close", "Close_Dolar"]
