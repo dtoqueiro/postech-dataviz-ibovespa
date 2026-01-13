@@ -338,7 +338,7 @@ def preparar_input(janela):
 # ==========================================================
 # BACKTEST COM CACHE
 # ==========================================================
-@st.cache_data()
+@st.cache_data(show_spinner="🔄 Executando backtest...")
 def executar_backtest(_df_feat):
     resultados = []
 
@@ -483,6 +483,13 @@ st.markdown("</div>", unsafe_allow_html=True)
 st.markdown("---")
 st.markdown("## 🧠 Análise de Performance (Backtest)")
 
+try:
+    df_backtest_full = executar_backtest(df_feat)
+    df_backtest_full["Data"] = pd.to_datetime(df_backtest_full["Data"])
+except Exception as e:
+    st.error(f"Erro ao executar backtest: {e}")
+    st.stop()
+
 # Seleção de período
 col_date1, col_date2, col_spacer = st.columns([2, 2, 1])
 with col_date1:
@@ -503,10 +510,10 @@ if len(df_bt) <= WINDOW_SIZE:
 
 # Executar backtest
 with st.spinner("🔄 Processando backtest..."):
-    df_backtest = executar_backtest(df_bt)
-    # teste
-    df_backtest.loc[str(data_ini) : str(data_fim)]
-
+    df_backtest = df_backtest_full[
+        (df_backtest_full["Data"].dt.date >= data_ini)
+        & (df_backtest_full["Data"].dt.date <= data_fim)
+    ]
     df_backtest["Acerto_Int"] = df_backtest["Acerto"].astype(int)
     df_backtest["Acuracia"] = df_backtest["Acerto_Int"].expanding().mean()
 
