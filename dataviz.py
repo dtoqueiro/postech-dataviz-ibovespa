@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import requests
 from yfinance import utils
+from pandas_datareader import data as pdr
 
 # ==========================================================
 # CONFIGURAÇÃO DA PÁGINA E ESTILO
@@ -269,31 +270,16 @@ scaler = carregar_scaler()
 # ==========================================================
 @st.cache_data
 def carregar_dados(periodo="4y"):
-    session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
-            )
-        }
-    )
-    # utils.get_json = utils._get_json
     try:
-        ibov = yf.download(
-            "^BVSP", period=periodo, progress=False, session=session, threads=False
-        )
-        dolar = yf.download(
-            "USDBRL=X", period=periodo, progress=False, session=session, threads=False
-        )
-        if ibov.empty or dolar.empty:
-            raise RuntimeError("Falha ao baixar dados do Yahoo Finance")
+        end = pd.Timestamp.today()
+        start = end - pd.DateOffset(years=4)
+        ibov = pdr.get_data_stooq("^BVSP", start=start, end=end)
+        dolar = pdr.get_data_stooq("USD/BRL", start=start, end=end)
+
+        ibov.sort_index(inplace=True)
+        dolar.sort_index(inplace=True)
 
         df = pd.concat([ibov[["Open", "High", "Low", "Close"]], dolar["Close"]], axis=1)
-
-        df.columns = ["Open", "High", "Low", "Close", "Close_Dolar"]
-        df.dropna(inplace=True)
         return df
     except Exception as e:
         st.error(f"❌ Erro ao carregar dados: {str(e)}")
