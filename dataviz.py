@@ -7,6 +7,8 @@ import yfinance as yf
 import joblib
 import plotly.graph_objects as go
 import plotly.express as px
+import requests
+from yfinance import utils
 
 # ==========================================================
 # CONFIGURAÇÃO DA PÁGINA E ESTILO
@@ -267,9 +269,26 @@ scaler = carregar_scaler()
 # ==========================================================
 @st.cache_data
 def carregar_dados(periodo="4y"):
+    session = requests.Session()
+    session.headers.update(
+        {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            )
+        }
+    )
+    # utils.get_json = utils._get_json
     try:
-        ibov = yf.download("^BVSP", period=periodo, interval="1d", progress=False)
-        dolar = yf.download("USDBRL=X", period=periodo, interval="1d", progress=False)
+        ibov = yf.download(
+            "^BVSP", period=periodo, progress=False, session=session, threads=False
+        )
+        dolar = yf.download(
+            "USDBRL=X", period=periodo, progress=False, session=session, threads=False
+        )
+        if ibov.empty or dolar.empty:
+            raise RuntimeError("Falha ao baixar dados do Yahoo Finance")
 
         df = pd.concat([ibov[["Open", "High", "Low", "Close"]], dolar["Close"]], axis=1)
 
