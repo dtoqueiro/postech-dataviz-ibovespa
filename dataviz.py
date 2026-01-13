@@ -279,7 +279,19 @@ def carregar_dados(periodo="4y"):
         ibov.sort_index(inplace=True)
         dolar.sort_index(inplace=True)
 
-        df = pd.concat([ibov[["Open", "High", "Low", "Close"]], dolar["Close"]], axis=1)
+        # 🔧 PADRONIZAÇÃO DE COLUNAS
+        ibov.rename(
+            columns={"open": "Open", "high": "High", "low": "Low", "close": "Close"},
+            inplace=True,
+        )
+
+        dolar.rename(columns={"close": "Close_Dolar"}, inplace=True)
+
+        df = pd.concat(
+            [ibov[["Open", "High", "Low", "Close"]], dolar["Close_Dolar"]], axis=1
+        )
+
+        df.dropna(inplace=True)
         return df
     except Exception as e:
         st.error(f"❌ Erro ao carregar dados: {str(e)}")
