@@ -338,7 +338,7 @@ def preparar_input(janela):
 # ==========================================================
 # BACKTEST COM CACHE
 # ==========================================================
-# @st.cache_data
+@st.cache_data()
 def executar_backtest(_df_feat):
     resultados = []
 
@@ -504,6 +504,9 @@ if len(df_bt) <= WINDOW_SIZE:
 # Executar backtest
 with st.spinner("🔄 Processando backtest..."):
     df_backtest = executar_backtest(df_bt)
+    # teste
+    df_backtest.loc[str(data_ini) : str(data_fim)]
+
     df_backtest["Acerto_Int"] = df_backtest["Acerto"].astype(int)
     df_backtest["Acuracia"] = df_backtest["Acerto_Int"].expanding().mean()
 
